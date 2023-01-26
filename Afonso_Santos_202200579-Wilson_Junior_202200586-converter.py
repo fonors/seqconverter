@@ -2,20 +2,24 @@
 from sys import argv, stderr, exit
 import argparse
 
-#inputfile = open(argv[1], "r")
+inputfile = open(argv[1], "r")
 #outputfile = open(argv[2], "w")
 
 def inputreader(inputf):
+    inputcontent = ""
     for line in inputfile:
         line = line.strip()
         inputcontent += line
     inputfile.seek(0)
+    return inputcontent
+
+def inputfirstln(inputf):
     for line in inputfile:
         line = line.strip()
         inputfirstln = line
         break
     inputfile.seek(0)
-    return inputcontent, inputfirstln
+    return inputfirstln
 
 def fastacheck(file):
     if file.startswith(">"):
@@ -32,10 +36,21 @@ def nexuscheck(file):
     return nexus
 
 def phylipcheck(file):
-    if int(inputfistln):
-        phylip = True
-    else:
+    try:
+        if int(inputfirstline):
+            phylip = True
+    except ValueError as err:
         phylip = False
     return phylip
 
-#inputfile.close()
+def inputchecker(file):
+    fasta = fastacheck(file)
+    nexus = nexuscheck(file)
+    phylip = phylipcheck(file)
+    if fasta:
+    elif nexus:
+    elif phylip:
+    else:
+        print("File provided isn't a valid FASTA, NEXUS or Phylip file.", file=stderr)
+
+inputfile.close()
