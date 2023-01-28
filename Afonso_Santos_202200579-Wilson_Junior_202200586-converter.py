@@ -5,20 +5,6 @@ import argparse
 inputfile = open(argv[1], "r")
 #outputfile = open(argv[2], "w")
 
-def fileanalyser(inputf):
-    """
-    Takes the input gathered using the inputreader() function and stores essential data for conversion. Serves as a middle ground solution
-    """
-    if filetype == "FASTA":
-        for line in inputf:
-            line = line.strip()
-            if line.startswith(">"):
-                line = line[1:]
-                seqname = line
-            else:
-                seqdict[seqname] += line
-#    elif filetype == "NEXUS": 
-
 def inputfirstln(inputf):
     """
     Returns the first line found in the file.
@@ -35,16 +21,32 @@ def filetype(inputf):
     Returns a string containing the input file's format.
     """
     inputfirstline = inputfirstln(inputf)
-    if inputf.startswith(">"):
+    if inputfirstline.startswith(">"):
         filetype = "FASTA"
-    if inputf.startswith("#NEXUS"):
+    elif inputfirstline.startswith("#NEXUS"):
         filetype = "NEXUS"
-    try:
-        if int(inputfirstline):
-            filetype = "Phylip"
-    except ValueError as err:
-        filetype = None
+    else:
+        try:
+            if int(inputfirstline):
+                filetype = "Phylip"
+        except ValueError as err:
+            filetype = None
     return filetype
+
+def fileanalyser(inputf):
+    """
+    Takes an input file and stores essential data for conversion. Serves as a middle ground solution
+    """
+    filetype = filetype(inputf)
+    if filetype == "FASTA":
+        for line in inputf:
+            line = line.strip()
+            if line.startswith(">"):
+                line = line[1:]
+                seqname = line
+            else:
+                seqdict[seqname] += line
+#    elif filetype == "NEXUS": 
 
 class Sequence():
     '''This class defines a DNA sequence'''
