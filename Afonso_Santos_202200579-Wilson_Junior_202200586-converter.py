@@ -5,15 +5,24 @@ import argparse
 inputfile = open(argv[1], "r")
 #outputfile = open(argv[2], "w")
 
-def inputreader(inputf):
-    inputcontent = ""
-    for line in inputf:
-        line = line.strip()
-        inputcontent += line
-    inputf.seek(0)
-    return inputcontent
+def fileanalyser(inputf):
+    """
+    Takes the input gathered using the inputreader() function and stores essential data for conversion. Serves as a middle ground solution
+    """
+    if filetype == "FASTA":
+        for line in inputf:
+            line = line.strip()
+            if line.startswith(">"):
+                line = line[1:]
+                seqname = line
+            else:
+                seqdict[seqname] += line
+#    elif filetype == "NEXUS": 
 
 def inputfirstln(inputf):
+    """
+    Returns the first line found in the file.
+    """
     for line in inputf:
         line = line.strip()
         inputfirstln = line
@@ -21,27 +30,21 @@ def inputfirstln(inputf):
     inputf.seek(0)
     return inputfirstln
 
-def fastacheck(inputf):
+def filetype(inputf):
+    """
+    Returns a string containing the input file's format.
+    """
+    inputfirstline = inputfirstln(inputf)
     if inputf.startswith(">"):
-        fasta = True
-    else:
-        fasta = False
-    return fasta
-
-def nexuscheck(inputf):
+        filetype = "FASTA"
     if inputf.startswith("#NEXUS"):
-        nexus = True
-    else:
-        nexus = False
-    return nexus
-
-def phylipcheck(inputf):
+        filetype = "NEXUS"
     try:
         if int(inputfirstline):
-            phylip = True
+            filetype = "Phylip"
     except ValueError as err:
-        phylip = False
-    return phylip
+        filetype = None
+    return filetype
 
 class Sequence():
     '''This class defines a DNA sequence'''
@@ -51,15 +54,5 @@ class Sequence():
         """
         seqlen = len(self)
         return seqlen
-
-def inputchecker(inputf):
-    fasta = fastacheck(inputf)
-    nexus = nexuscheck(inputf)
-    phylip = phylipcheck(inputf)
-#    if fasta:
-#    elif nexus:
-#    elif phylip:
-#    else:
-#        print("File provided isn't a valid FASTA, NEXUS or Phylip file.", file=stderr)
 
 inputfile.close()
