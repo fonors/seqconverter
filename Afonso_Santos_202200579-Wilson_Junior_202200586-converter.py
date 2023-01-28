@@ -7,35 +7,35 @@ inputfile = open(argv[1], "r")
 
 def inputreader(inputf):
     inputcontent = ""
-    for line in inputfile:
+    for line in inputf:
         line = line.strip()
         inputcontent += line
-    inputfile.seek(0)
+    inputf.seek(0)
     return inputcontent
 
 def inputfirstln(inputf):
-    for line in inputfile:
+    for line in inputf:
         line = line.strip()
         inputfirstln = line
         break
-    inputfile.seek(0)
+    inputf.seek(0)
     return inputfirstln
 
-def fastacheck(file):
-    if file.startswith(">"):
+def fastacheck(inputf):
+    if inputf.startswith(">"):
         fasta = True
     else:
         fasta = False
     return fasta
 
-def nexuscheck(file):
-    if file.startswith("#NEXUS"):
+def nexuscheck(inputf):
+    if inputf.startswith("#NEXUS"):
         nexus = True
     else:
         nexus = False
     return nexus
 
-def phylipcheck(file):
+def phylipcheck(inputf):
     try:
         if int(inputfirstline):
             phylip = True
@@ -43,14 +43,23 @@ def phylipcheck(file):
         phylip = False
     return phylip
 
-def inputchecker(file):
-    fasta = fastacheck(file)
-    nexus = nexuscheck(file)
-    phylip = phylipcheck(file)
-    if fasta:
-    elif nexus:
-    elif phylip:
-    else:
-        print("File provided isn't a valid FASTA, NEXUS or Phylip file.", file=stderr)
+class Sequence():
+    '''This class defines a DNA sequence'''
+    def seqlen(self):
+        """
+        Checks the length of the sequence.
+        """
+        seqlen = len(self)
+        return seqlen
+
+def inputchecker(inputf):
+    fasta = fastacheck(inputf)
+    nexus = nexuscheck(inputf)
+    phylip = phylipcheck(inputf)
+#    if fasta:
+#    elif nexus:
+#    elif phylip:
+#    else:
+#        print("File provided isn't a valid FASTA, NEXUS or Phylip file.", file=stderr)
 
 inputfile.close()
