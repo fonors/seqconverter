@@ -114,7 +114,7 @@ def Phylip_writer(seqdict, outputf):
 #        print("Output file does not have a valid extension! Try '.fasta', '.nexus' or '.phy'.", file=stderr)
 #        exit()
 
-def converttofasta(inputf, outputf):
+def Fasta_writer(inputf, outputf):
     seqdict = fileanalyser(inputf)
     with open(outputf, "w") as newfastaf:
         for seq in seqdict:
