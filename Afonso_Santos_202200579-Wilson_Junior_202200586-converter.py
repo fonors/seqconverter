@@ -28,10 +28,11 @@ def filetype(inputf):
         filetype = "NEXUS"
     else:
         try:
-            if int(inputfirstline):
+            if int(inputfirstline.replace(" ", "")):
                 filetype = "Phylip"
         except ValueError as err:
-            filetype = filetype
+            filetype = None
+            print("File provided isn't a valid FASTA, NEXUS or Phyilip format.", file=stderr)
     return filetype
 
 def fileanalyser(inputf):
@@ -44,18 +45,27 @@ def fileanalyser(inputf):
         for line in inputf:
             line = line.strip()
             if line.startswith(">"):
-                line = line[1:]
-                seqname = line
+                seqname = line[1:]
             else:
                 seqdict[seqname] += line
     elif fformat == "NEXUS":
         for line in inputf:
             line = line.strip()
             if "     " in line:
-                startseq = line.index("     ") + 5
+                seqstart = line.index("     ") + 5
                 seqname_end = line.index("     ")
                 seqname = line[:seqname_end]
-                seqdict[seqname] = line[startseq:]
+                seqdict[seqname] = line[seqstart:]
+    elif fformat == "Phylip":
+        for line in inputf:
+            line = line.strip()
+            if "   " in line:
+                seqstart = line.index("   ") + 3
+                seqname_end = line.index("   ")
+                seqname = line[:seqname_end]
+                seqdict[seqname] = line[seqstart:]
+    else:
+        print("File provided isn't a valid FASTA, NEXUS or Phyilip format.", file=stderr)
     inputf.seek(0)
     return seqdict
 
