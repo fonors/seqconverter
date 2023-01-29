@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from sys import argv, stderr, exit
+from textwrap import wrap
 import argparse
 
 inputfile = open(argv[1], "r")
@@ -33,6 +34,7 @@ def filetype(inputf):
         except ValueError as err:
             filetype = None
             print("File provided isn't a valid FASTA, NEXUS or Phyilip format.", file=stderr)
+            exit()
     return filetype
 
 def fileanalyser(inputf):
@@ -66,6 +68,7 @@ def fileanalyser(inputf):
                 seqdict[seqname] = line[seqstart:]
     else:
         print("File provided isn't a valid FASTA, NEXUS or Phyilip format.", file=stderr)
+        exit()
     inputf.seek(0)
     return seqdict
 
@@ -101,5 +104,23 @@ def Phylip_writer(seqdict, outputf):
         file.write(str(len(seqdict)) + " " + str(seqlen) + "\n")
         for seq in seqdict:
             file.write(seq + "   " + seqdict[seq] + "\n")
+
+#def outputformat(outputf):
+#    if outputf.endswith(".fasta"):
+#        converttofasta()
+#    elif outputf.endswith(".nexus")
+#    elif outputf.endswith(".phy")
+#    else:
+#        print("Output file does not have a valid extension! Try '.fasta', '.nexus' or '.phy'.", file=stderr)
+#        exit()
+
+def converttofasta(inputf, outputf):
+    seqdict = fileanalyser(inputf)
+    with open(outputf, "w") as newfastaf:
+        for seq in seqdict:
+            seqdict[seq] = seqdict[seq].upper().replace("-", "")
+            newfastaf.write(f">{seq}\n")
+            newfastaf.write("\n".join(wrap(seqdict[seq], 80)))
+            newfastaf.write("\n\n")
 
 inputfile.close
