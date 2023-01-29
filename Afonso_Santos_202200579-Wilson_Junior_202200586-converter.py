@@ -20,6 +20,7 @@ def filetype(inputf):
     """
     Returns a string containing the input file's format.
     """
+    filetype = None
     inputfirstline = inputfirstln(inputf)
     if inputfirstline.startswith(">"):
         filetype = "FASTA"
@@ -30,14 +31,14 @@ def filetype(inputf):
             if int(inputfirstline):
                 filetype = "Phylip"
         except ValueError as err:
-            filetype = None
+            filetype = filetype
     return filetype
 
 def fileanalyser(inputf):
     """
     Takes an input file and stores essential data for conversion. Serves as a middle ground solution
     """
-    
+    seqdict = {}
     filetype = filetype(inputf)
     if filetype == "FASTA":
         for line in inputf:
@@ -47,14 +48,16 @@ def fileanalyser(inputf):
                 seqname = line
             else:
                 seqdict[seqname] += line
+            inputf.seek(0)
     elif filetype == "NEXUS":
         for line in inputf:
-            line.strip()
-            if line.upper() != "BEGIN DATA;" and "END;" and line != "matrix":
-                seqname = line.split()
-            elif:
-                seqname[1] = seq 
+            line = line.strip()
+            if line.upper() != "#NEXUS" and line.endswith(";") and line.upper() != "MATRIX":
+                seqname = line[:" "]
+            else:
+                seqdict[seqname] += line.upper() 
                 seqdict[seqname[0]] = seq[1]
+            inputf.seek(0)
 
 
 class Sequence():
@@ -65,6 +68,7 @@ class Sequence():
         """
         seqlen = len(self)
         return seqlen
+
 def phylip_writer(seqdict, outputf):
     with open(output, "w"):
         output.write(str(len(seqdict[seq])) + " " +
