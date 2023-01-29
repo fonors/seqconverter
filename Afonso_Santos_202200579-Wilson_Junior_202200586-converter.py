@@ -37,6 +37,7 @@ def fileanalyser(inputf):
     """
     Takes an input file and stores essential data for conversion. Serves as a middle ground solution
     """
+    
     filetype = filetype(inputf)
     if filetype == "FASTA":
         for line in inputf:
@@ -46,7 +47,15 @@ def fileanalyser(inputf):
                 seqname = line
             else:
                 seqdict[seqname] += line
-#    elif filetype == "NEXUS": 
+    elif filetype == "NEXUS":
+        for line in inputf:
+            line.strip()
+            if line.upper() != "BEGIN DATA;" and "END;" and line != "matrix":
+                seqname = line.split()
+            elif:
+                seqname[1] = seq 
+                seqdict[seqname[0]] = seq[1]
+
 
 class Sequence():
     '''This class defines a DNA sequence'''
@@ -56,5 +65,7 @@ class Sequence():
         """
         seqlen = len(self)
         return seqlen
-
-inputfile.close()
+def phylip_writer(seqdict, outputf):
+    with open(output, "w"):
+        output.write(str(len(seqdict[seq])) + " " +
+inputfile.close
