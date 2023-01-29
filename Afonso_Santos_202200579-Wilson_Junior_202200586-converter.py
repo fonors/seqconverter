@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-from sys import argv, stderr, exit
-from textwrap import wrap
 import argparse
+from sys import stderr, exit
+from textwrap import wrap
 
 class Sequence():
     '''This class defines a DNA sequence'''
@@ -12,23 +12,23 @@ class Sequence():
         seqlen = len(self)
         return seqlen
 
-def inputfirstln(inputf):
+def inputfirstln(inputfile):
     """
     Returns the first line found in the file.
     """
-    for line in inputf:
+    for line in inputfile:
         line = line.strip()
         inputfirstln = line
         break
-    inputf.seek(0)
+    inputfile.seek(0)
     return inputfirstln
 
-def filetype(inputf):
+def filetype(inputfile):
     """
     Returns a string containing the input file's format.
     """
     filetype = None
-    inputfirstline = inputfirstln(inputf)
+    inputfirstline = inputfirstln(inputfile)
     if inputfirstline.startswith(">"):
         filetype = "FASTA"
     elif inputfirstline.startswith("#NEXUS"):
@@ -43,22 +43,22 @@ def filetype(inputf):
             exit()
     return filetype
 
-def fileanalyser(inputf):
+def fileanalyser(inputfile):
     """
     Takes an input file and stores essential data for conversion. Serves as a middle ground solution.
     """
     seqdict = {}
-    fformat = filetype(inputf)
-    if fformat == "FASTA":
-        for line in inputf:
+    fileformat = filetype(inputfile)
+    if fileformat == "FASTA":
+        for line in inputfile:
             line = line.strip()
             if line.startswith(">"):
                 seqname = line[1:]
             else:
                 seqdict[seqname] += line
                 seqdict[seqname] = Sequence()
-    elif fformat == "NEXUS":
-        for line in inputf:
+    elif fileformat == "NEXUS":
+        for line in inputfile:
             line = line.strip()
             if "     " in line:
                 seqstart = line.index("     ") + 5
@@ -66,8 +66,8 @@ def fileanalyser(inputf):
                 seqname = line[:seqname_end]
                 seqdict[seqname] = line[seqstart:]
                 seqdict[seqname] = Sequence()
-    elif fformat == "Phylip":
-        for line in inputf:
+    elif fileformat == "Phylip":
+        for line in inputfile:
             line = line.strip()
             if "   " in line:
                 seqstart = line.index("   ") + 3
@@ -78,55 +78,57 @@ def fileanalyser(inputf):
     else:
         print("File provided isn't a valid FASTA, NEXUS or Phyilip format.", file=stderr)
         exit()
-    inputf.seek(0)
+    inputfile.seek(0)
     return seqdict
 
-def fasta_writer(inputf, outputf):
+def fasta_writer(inputfile, outputfile):
     """
     Takes the intermediate data from a file using the fileanalyser() function and creates a FASTA file.
     """
-    seqdict = fileanalyser(inputf)
-    with open(outputf, "w") as newfastaf:
+    seqdict = fileanalyser(inputfile)
+    with open(outputfile, "w") as newfastafile:
         for seq in seqdict:
             seqdict[seq] = seqdict[seq].upper().replace("-", "")
-            newfastaf.write(f">{seq}\n")
-            newfastaf.write("\n".join(wrap(seqdict[seq], 80)))
-            newfastaf.write("\n\n")
+            newfastafile.write(f">{seq}\n")
+            newfastafile.write("\n".join(wrap(seqdict[seq], 80)))
+            newfastafile.write("\n\n")
 
-def nexus_writer(seqdict, outputf):
+def nexus_writer(inputfile, outputfile):
     """
     Takes the intermediate data from a file using the fileanalyser() function and creates a NEXUS file.
     """
-    with open(outputf, "w") as file:
-        file.write("#NEXUS\n")
-        file.write("BEGIN DATA;\n")
-        file.write("DIMENSIONS NTAX=" + str(len(seqdict)) + "NACHAR=" + str(seqdict[seq].seqlen()) + ";\n")
-        file.write("FORMAT DATATYPE=DNA MISSING=N GAP=-;\n")
-        file.write("MATRIX\n")
+    seqdict = fileanalyser(inputfile)
+    with open(outputfile, "w") as newnexusfile:
+        newnexusfile.write("#NEXUS\n\n")
+        newnexusfile.write("BEGIN DATA;\n")
+        newnexusfile.write(f"DIMENSIONS NTAX={str(len(seqdict))} NACHAR={str(seqdict[seq].seqlen())};\n")
+        newnexusfile.write("FORMAT DATATYPE=DNA MISSING=N GAP=-;\n")
+        newnexusfile.write("MATRIX\n\n")
         for seq in seqdict:
-            file.write(f"{seq}     {seqdict[seq]}\n")
-        file.write(";\n")
-        fie.write("END;")
+            newnexusfile.write(f"{seq}     {seqdict[seq]}\n")
+        newnexusfile.write(";\n")
+        newnexusfile.write("END;")
 
-def phylip_writer(seqdict, outputf):
+def phylip_writer(inputfile, outputfile):
     """
     Takes the intermediate data from a file using the fileanalyser() function and creates a Phylip file.
     """
-    with open(outputf, "w") as file:
-        file.write(str(len(seqdict)) + " " + str(seqlen) + "\n")
+    seqdict = fileanalyser(inputfile)
+    with open(outputfile, "w") as newphylipfile:
+        newphylipfile.write(f"{str(len(seqdict))} {str(seqlen)}\n")
         for seq in seqdict:
-            file.write(f"{seq}   {seqdict[seq]}\n")
+            newphylipfile.write(f"{seq}   {seqdict[seq]}\n")
 
-def output_writer(outputf):
+def output_writer(outputfile):
     """
     Determines the output format and executes the adequate function to convert to it.
     """
-    if outputf.endswith(".fasta"):
-        converttofasta(outputf)
-    elif outputf.endswith(".nexus"):
-        nexus_writer(outputf)
-    elif outputf.endswith(".phy"):
-        phylip_writer(outputf)
+    if outputfile.endswith(".fasta"):
+        converttofasta(outputfile)
+    elif outputfile.endswith(".nexus"):
+        nexus_writer(outputfile)
+    elif outputfile.endswith(".phy"):
+        phylip_writer(outputfile)
     else:
         print("Output file does not have a valid extension! Try '.fasta', '.nexus' or '.phy'.", file=stderr)
         exit()
