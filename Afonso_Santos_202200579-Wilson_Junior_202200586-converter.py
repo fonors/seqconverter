@@ -103,6 +103,4 @@ def converttofasta(inputf, outputf):
             newfastaf.write("\n".join(wrap(seqdict[seq], 80)))
             newfastaf.write("\n\n")
 
-converttofasta(inputfile, argv[2])
-
 inputfile.close
