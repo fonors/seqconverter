@@ -79,10 +79,13 @@ class Sequence():
         return seqlen
 
 def Nexus_writer(seqdict, outputf):
+    """
+    Write the Nexus file.
+    """
     with open(outputf, "w") as file:
         file.write("#NEXUS\n")
         file.write("BEGIN DATA;\n")
-        file.write("DIMENSIONS NTAX=" + str(len(seqdict))) + "NACHAR=" + str(seqlen) + ";\n")
+        file.write("DIMENSIONS NTAX=" + str(len(seqdict)) + "NACHAR=" + str(seqlen) + ";\n")
         file.write("FORMAT DATATYPE=DNA MISSING=N GAP=-;\n")
         file.write("MATRIX\n")
         for seq in seqdict:
@@ -90,8 +93,13 @@ def Nexus_writer(seqdict, outputf):
         file.write(";\n")
         fie.write("END;")  
 
-#def phylip_writer(seqdict, outputf):
-#    with open(output, "w"):
-#        output.write(str(len(seqdict[seq])) + " " +
+def Phylip_writer(seqdict, outputf):
+    """
+    Write the Phylip file.
+    """
+    with open(outputf, "W") as file:
+        file.write(str(len(seqdict)) + " " + str(seqlen) + "\n")
+        for seq in seqdict:
+            file.write(seq + "   " + seqdict[seq] + "\n")
 
 inputfile.close
