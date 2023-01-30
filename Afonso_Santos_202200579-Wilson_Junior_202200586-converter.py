@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import argparse
-from sys import stderr, exit
+from sys import argv, stderr, exit
 from textwrap import wrap
 
 class Sequence():
@@ -16,69 +16,70 @@ def inputfirstln(inputfile):
     """
     Returns the first line found in the file.
     """
-    for line in inputfile:
-        line = line.strip()
-        inputfirstln = line
-        break
-    inputfile.seek(0)
+    with open(inputfile, "r") as inputfile:
+        for line in inputfile:
+            line = line.strip()
+            inputfirstln = line
+            break
     return inputfirstln
 
 def filetype(inputfile):
     """
     Returns a string containing the input file's format.
     """
-    filetype = None
-    inputfirstline = inputfirstln(inputfile)
-    if inputfirstline.startswith(">"):
-        filetype = "FASTA"
-    elif inputfirstline.startswith("#NEXUS"):
-        filetype = "NEXUS"
-    else:
-        try:
-            if int(inputfirstline.replace(" ", "")):
-                filetype = "Phylip"
-        except ValueError as err:
-            filetype = None
-            print("File provided isn't a valid FASTA, NEXUS or Phyilip format.", file=stderr)
-            exit()
+    with open(inputfile, "r") as inputfile:
+        filetype = None
+        inputfirstline = inputfirstln(inputfile)
+        if inputfirstline.startswith(">"):
+            filetype = "FASTA"
+        elif inputfirstline.startswith("#NEXUS"):
+            filetype = "NEXUS"
+        else:
+            try:
+                if int(inputfirstline.replace(" ", "")):
+                    filetype = "Phylip"
+            except ValueError as err:
+                filetype = None
+                print("File provided isn't a valid FASTA, NEXUS or Phyilip format.", file=stderr)
+                exit()
     return filetype
 
 def fileanalyser(inputfile):
     """
     Takes an input file and stores essential data for conversion. Serves as a middle ground solution.
     """
-    seqdict = {}
-    fileformat = filetype(inputfile)
-    if fileformat == "FASTA":
-        for line in inputfile:
-            line = line.strip()
-            if line.startswith(">"):
-                seqname = line[1:]
-            else:
-                seqdict[seqname] += line
-                seqdict[seqname] = Sequence()
-    elif fileformat == "NEXUS":
-        for line in inputfile:
-            line = line.strip()
-            if "     " in line:
-                seqstart = line.index("     ") + 5
-                seqname_end = line.index("     ")
-                seqname = line[:seqname_end]
-                seqdict[seqname] = line[seqstart:]
-                seqdict[seqname] = Sequence()
-    elif fileformat == "Phylip":
-        for line in inputfile:
-            line = line.strip()
-            if "   " in line:
-                seqstart = line.index("   ") + 3
-                seqname_end = line.index("   ")
-                seqname = line[:seqname_end]
-                seqdict[seqname] = line[seqstart:]
-                seqdict[seqname] = Sequence()
-    else:
-        print("File provided isn't a valid FASTA, NEXUS or Phyilip format.", file=stderr)
-        exit()
-    inputfile.seek(0)
+    with open(inputfile, "r") as inputfile:
+        seqdict = {}
+        fileformat = filetype(inputfile)
+        if fileformat == "FASTA":
+            for line in inputfile:
+                line = line.strip()
+                if line.startswith(">"):
+                    seqname = line[1:]
+                else:
+                    seqdict[seqname] += line
+                    seqdict[seqname] = Sequence()
+        elif fileformat == "NEXUS":
+            for line in inputfile:
+                line = line.strip()
+                if "     " in line:
+                    seqstart = line.index("     ") + 5
+                    seqname_end = line.index("     ")
+                    seqname = line[:seqname_end]
+                    seqdict[seqname] = line[seqstart:]
+                    seqdict[seqname] = Sequence()
+        elif fileformat == "Phylip":
+            for line in inputfile:
+                line = line.strip()
+                if "   " in line:
+                    seqstart = line.index("   ") + 3
+                    seqname_end = line.index("   ")
+                    seqname = line[:seqname_end]
+                    seqdict[seqname] = line[seqstart:]
+                    seqdict[seqname] = Sequence()
+        else:
+            print("File provided isn't a valid FASTA, NEXUS or Phyilip format.", file=stderr)
+            exit()
     return seqdict
 
 def fasta_writer(inputfile, outputfile):
@@ -108,6 +109,7 @@ def nexus_writer(inputfile, outputfile):
             newnexusfile.write(f"{seq}     {seqdict[seq]}\n")
         newnexusfile.write(";\n")
         newnexusfile.write("END;")
+    originalfile.close()
 
 def phylip_writer(inputfile, outputfile):
     """
@@ -132,3 +134,5 @@ def output_writer(outputfile):
     else:
         print("Output file does not have a valid extension! Try '.fasta', '.nexus' or '.phy'.", file=stderr)
         exit()
+
+nexus_writer(argv[1], argv[2])
