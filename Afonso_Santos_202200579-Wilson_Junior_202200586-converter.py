@@ -136,10 +136,19 @@ def phylip_writer(inputfile, outputfile):
     Takes the intermediate data from a file using the fileanalyser() function and creates a Phylip file.
     """
     seqdict = fileanalyser(inputfile)
+    maxseqlength = maxseqlen(inputfile)
     with open(outputfile, "w") as newphylipfile:
         newphylipfile.write(f"{str(len(seqdict))} {str(maxseqlen(inputfile))}\n")
         for seq in seqdict:
-            newphylipfile.write(f"{seq}   {seqdict[seq]}\n")
+            #if seqdict[seq].seqlen() < maxseqlength:
+            if len(seqdict[seq]) < maxseqlength:
+                ngaps = maxseqlength - seqdict[seq].seqlen()
+                newphylipfile.write(f"{seq}   {seqdict[seq]}")
+                for gaps in range(ngaps):
+                    newphylipfile.write("-")
+                newphylipfile.write("\n")
+            else:
+                newphylipfile.write(f"{seq}   {seqdict[seq]}\n")
 
 def output_writer(outputfile):
     """
@@ -154,3 +163,4 @@ def output_writer(outputfile):
     else:
         print("Output file does not have a valid extension! Try '.fasta', '.nexus' or '.phy'.", file=stderr)
         exit()
+phylip_writer(argv[1], argv[2])
