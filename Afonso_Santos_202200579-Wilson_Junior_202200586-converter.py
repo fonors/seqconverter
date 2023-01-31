@@ -1,7 +1,17 @@
 #!/usr/bin/env python3
 import argparse
-from sys import argv, stderr, exit
+from sys import stderr, exit
 from textwrap import wrap
+
+parser = argparse.ArgumentParser(
+                    prog = 'Sequence Storage File Converter',
+                    description = 'A file converter in Python that converts FASTA, NEXUS and Phylip files.',
+                    epilog = 'Does not work on "interleave" NEXUS or Phylip files.')
+
+parser.add_argument("-i", "--input", help="Takes the source file for conversion")
+parser.add_argument("-o", "--output", help="Takes the input file and converts to one with the name and extension provided here")
+args = parser.parse_args()
+
 
 class Sequence():
     '''This class defines a DNA sequence'''
@@ -59,8 +69,10 @@ def fileanalyser(inputfile):
                 line = line.strip()
                 if line.startswith(">"):
                     seqname = line[1:]
+                    seqdict[seqname] = ""
                 else:
                     seqdict[seqname] += line
+                    seqdict[seqname] = seqdict[seqname].lower()
                     seqclassdict = Sequence(seqdict[seqname])
         elif fileformat == "NEXUS":
             for line in inputfile:
@@ -121,7 +133,8 @@ def nexus_writer(inputfile, outputfile):
         for seq in seqdict:
             #if seqdict[seq].seqlen() < maxseqlength:
             if len(seqdict[seq]) < maxseqlength:
-                ngaps = maxseqlength - seqdict[seq].seqlen()
+                #ngaps = maxseqlength - seqdict[seq].seqlen()
+                ngaps = maxseqlength - len(seqdict[seq])
                 newnexusfile.write(f"{seq}     {seqdict[seq]}")
                 for gaps in range(ngaps):
                     newnexusfile.write("-")
@@ -142,7 +155,8 @@ def phylip_writer(inputfile, outputfile):
         for seq in seqdict:
             #if seqdict[seq].seqlen() < maxseqlength:
             if len(seqdict[seq]) < maxseqlength:
-                ngaps = maxseqlength - seqdict[seq].seqlen()
+                #ngaps = maxseqlength - seqdict[seq].seqlen()
+                ngaps = maxseqlength - len(seqdict[seq])
                 newphylipfile.write(f"{seq}   {seqdict[seq]}")
                 for gaps in range(ngaps):
                     newphylipfile.write("-")
@@ -150,17 +164,23 @@ def phylip_writer(inputfile, outputfile):
             else:
                 newphylipfile.write(f"{seq}   {seqdict[seq]}\n")
 
-def output_writer(outputfile):
+def converter(inputfile, outputfile):
     """
     Determines the output format and executes the adequate function to convert to it.
     """
-    if outputfile.endswith(".fasta"):
-        converttofasta(outputfile)
-    elif outputfile.endswith(".nexus"):
-        nexus_writer(outputfile)
-    elif outputfile.endswith(".phy"):
-        phylip_writer(outputfile)
-    else:
-        print("Output file does not have a valid extension! Try '.fasta', '.nexus' or '.phy'.", file=stderr)
-        exit()
-phylip_writer(argv[1], argv[2])
+    try:
+        if outputfile.endswith(".fasta"):
+            fasta_writer(inputfile, outputfile)
+        elif outputfile.endswith(".nexus"):
+            nexus_writer(inputfile, outputfile)
+        elif outputfile.endswith(".phy"):
+            phylip_writer(inputfile, outputfile)
+        else:
+            print("Output file does not have a valid extension! Try '.fasta', '.nexus' or '.phy'.", file=stderr)
+            exit()
+    except TypeError as err:
+        print("You did not provide an input file!", file=stderr)
+    except AttributeError as err:
+        print("You did not provide an output file!", file=stderr)
+
+converter(args.input, args.output)
