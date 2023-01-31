@@ -12,7 +12,6 @@ parser.add_argument("-i", "--input", help="Takes the source file for conversion"
 parser.add_argument("-o", "--output", help="Takes the input file and converts to one with the name and extension provided here")
 args = parser.parse_args()
 
-
 class Sequence():
     '''This class defines a DNA sequence'''
     def __init__(self, seq):
@@ -98,6 +97,9 @@ def fileanalyser(inputfile):
     return seqdict
 
 def maxseqlen(inputfile):
+    """
+    Uses the fileanalyser() function to dermine the biggest sequence found within a certain source file.
+    """
     seqdict = fileanalyser(inputfile)
     seqlist = []
     for seq in seqdict:
