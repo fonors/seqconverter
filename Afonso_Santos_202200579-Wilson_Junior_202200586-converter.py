@@ -1,3 +1,20 @@
+'''
+    Sequence Storage File Converter - A FASTA, NEXUS and Phylip file converter
+    Copyright (C) 2023  fonors & Wil-s0n
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+'''
 #!/usr/bin/env python3
 import argparse
 from sys import stderr, exit
@@ -11,17 +28,6 @@ parser = argparse.ArgumentParser(
 parser.add_argument("-i", "--input", help="Takes the source file for conversion")
 parser.add_argument("-o", "--output", help="Takes the input file and converts to one with the name and extension provided here")
 args = parser.parse_args()
-
-class Sequence():
-    '''This class defines a DNA sequence'''
-    def __init__(self, seq):
-        self.sequence = seq
-    def seqlen(self):
-        """
-        Checks the length of the sequence.
-        """
-        self.seqlen = len(self.sequence)
-        return(self.seqlen)
 
 def inputfirstln(inputfile):
     """
@@ -62,7 +68,6 @@ def fileanalyser(inputfile):
     fileformat = filetype(inputfile)
     with open(inputfile, "r") as inputfile:
         seqdict = {}
-        seqclassdict = {}
         if fileformat == "FASTA":
             for line in inputfile:
                 line = line.strip()
@@ -72,7 +77,6 @@ def fileanalyser(inputfile):
                 else:
                     seqdict[seqname] += line
                     seqdict[seqname] = seqdict[seqname].lower()
-                    seqclassdict = Sequence(seqdict[seqname])
         elif fileformat == "NEXUS":
             for line in inputfile:
                 line = line.strip()
@@ -81,7 +85,6 @@ def fileanalyser(inputfile):
                     seqname_end = line.index("     ")
                     seqname = line[:seqname_end]
                     seqdict[seqname] = line[seqstart:]
-                    seqclassdict[seqname] = Sequence(seqdict[seqname])
         elif fileformat == "Phylip":
             for line in inputfile:
                 line = line.strip()
@@ -90,7 +93,6 @@ def fileanalyser(inputfile):
                     seqname_end = line.index("   ")
                     seqname = line[:seqname_end]
                     seqdict[seqname] = line[seqstart:]
-                    seqclassdict[seqname] = Sequence(seqdict[seqname])
         else:
             print("File provided isn't a valid FASTA, NEXUS or Phyilip format.", file=stderr)
             exit()
