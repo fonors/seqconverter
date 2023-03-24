@@ -1,5 +1,5 @@
 '''
-    Sequence Storage File Converter - A FASTA, NEXUS and Phylip file converter
+    FNP Sequence File Converter - A FASTA, NEXUS and Phylip file converter
     Copyright (C) 2023  fonors & Wil-s0n
 
     This program is free software: you can redistribute it and/or modify
