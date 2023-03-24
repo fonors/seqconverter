@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 '''
     FNP Sequence File Converter - A FASTA, NEXUS and Phylip file converter
     Copyright (C) 2023  fonors & Wil-s0n
@@ -15,7 +16,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 '''
-#!/usr/bin/env python3
+
 import argparse
 from sys import stderr, exit
 from textwrap import wrap
@@ -110,6 +111,19 @@ def maxseqlen(inputfile):
     maxseqlen = max(len(seq) for seq in seqlist)
     return maxseqlen
 
+def dnacheck(inputfile):
+    """
+    Checks a given sequence for uracile or thiamine to determine if the sequence is DNA or RNA.
+    """
+    seq_dict = fileanalyser(inputfile)
+    for seq in seq_dict:
+        current_sequence = seq_dict[seq].upper()
+        if "U" in current_sequence:
+            isdna = False
+        elif "T" in current_sequence:
+            isdna = True
+    return isdna
+
 def fasta_writer(inputfile, outputfile):
     """
     Takes the intermediate data from a file using the fileanalyser() function and creates a FASTA file.
@@ -128,11 +142,15 @@ def nexus_writer(inputfile, outputfile):
     """
     seqdict = fileanalyser(inputfile)
     maxseqlength = maxseqlen(inputfile)
+    isdna = dnacheck(inputfile)
     with open(outputfile, "w") as newnexusfile:
         newnexusfile.write("#NEXUS\n\n")
         newnexusfile.write("BEGIN DATA;\n")
         newnexusfile.write(f"DIMENSIONS NTAX={str(len(seqdict))} NCHAR={str(maxseqlen(inputfile))};\n")
-        newnexusfile.write("FORMAT DATATYPE=DNA MISSING=N GAP=-;\n")
+        if isdna:
+            newnexusfile.write("FORMAT DATATYPE=DNA MISSING=N GAP=-;\n")
+        else:
+            newnexusfile.write("FORMAT DATATYPE=RNA MISSING=N GAP=-;\n")
         newnexusfile.write("MATRIX\n\n")
         for seq in seqdict:
             #if seqdict[seq].seqlen() < maxseqlength:
