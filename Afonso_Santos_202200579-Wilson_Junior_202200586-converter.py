@@ -107,13 +107,12 @@ def maxseqlen(inputfile):
     seqlist = []
     for seq in seqdict:
         seqlist.append(seqdict[seq])
-    #maxseqlen = max(seq.seqlen() for seq in seqlist)
     maxseqlen = max(len(seq) for seq in seqlist)
     return maxseqlen
 
 def dnacheck(inputfile):
     """
-    Uses the fileanalyser() function and then checks a given sequence for thiamine or uracile to determine if the sequence is DNA or RNA.
+    Uses the fileanalyser() function and then checks a given sequence for thiamine or uracile to determine if the sequence is DNA or RNA, respectively.
     """
     seq_dict = fileanalyser(inputfile)
     for seq in seq_dict:
@@ -153,9 +152,7 @@ def nexus_writer(inputfile, outputfile):
             newnexusfile.write("FORMAT DATATYPE=RNA MISSING=N GAP=-;\n")
         newnexusfile.write("MATRIX\n\n")
         for seq in seqdict:
-            #if seqdict[seq].seqlen() < maxseqlength:
             if len(seqdict[seq]) < maxseqlength:
-                #ngaps = maxseqlength - seqdict[seq].seqlen()
                 ngaps = maxseqlength - len(seqdict[seq])
                 newnexusfile.write(f"{seq}     {seqdict[seq]}")
                 for gaps in range(ngaps):
@@ -175,9 +172,7 @@ def phylip_writer(inputfile, outputfile):
     with open(outputfile, "w") as newphylipfile:
         newphylipfile.write(f"{str(len(seqdict))} {str(maxseqlen(inputfile))}\n")
         for seq in seqdict:
-            #if seqdict[seq].seqlen() < maxseqlength:
             if len(seqdict[seq]) < maxseqlength:
-                #ngaps = maxseqlength - seqdict[seq].seqlen()
                 ngaps = maxseqlength - len(seqdict[seq])
                 newphylipfile.write(f"{seq}   {seqdict[seq]}")
                 for gaps in range(ngaps):
