@@ -113,7 +113,7 @@ def maxseqlen(inputfile):
 
 def dnacheck(inputfile):
     """
-    Checks a given sequence for uracile or thiamine to determine if the sequence is DNA or RNA.
+    Uses the fileanalyser() function and then checks a given sequence for thiamine or uracile to determine if the sequence is DNA or RNA.
     """
     seq_dict = fileanalyser(inputfile)
     for seq in seq_dict:
